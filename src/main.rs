@@ -1,6 +1,12 @@
+mod machine;
+mod cpu;
+mod ram;
+
 use std::env;
 use std::fs::File;
 use std::io::Read;
+
+use machine::Machine;
 
 
 fn main() {
@@ -17,5 +23,8 @@ fn main() {
     let mut data = Vec::<u8>::new();
     file.read_to_end(&mut data).expect("File not found!");
 
+    let mut machine = Machine::new();
+    machine.load_rom(data);
+    machine.start();
     
 }
