@@ -1,3 +1,4 @@
+
 fn main() {
-    println!("Hello, world!");
+    println!("Hello, this is my chip 8 emulator!");
 }
