@@ -1,3 +1,5 @@
+use crate::bus::Bus;
+
 //#[derive(Debug)]
 pub struct Cpu {
     vx: [u8; 16],
@@ -7,6 +9,7 @@ pub struct Cpu {
     program_counter: u16,
     stack_pointer: u8,
     stack: [u16; 16],
+    //TODO add bus reference as a property, read about lifetimes
 }
 
 impl Cpu {
@@ -22,4 +25,7 @@ impl Cpu {
         }
     }
 
+    pub fn execute_instruction(&mut self, bus: &Bus) { 
+        unimplemented!();
+    }
 }

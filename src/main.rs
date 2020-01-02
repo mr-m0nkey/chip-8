@@ -1,6 +1,7 @@
 mod machine;
 mod cpu;
 mod ram;
+mod bus;
 
 use std::env;
 use std::fs::File;
