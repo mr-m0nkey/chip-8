@@ -16,7 +16,7 @@ impl Machine {
     }
 
     pub fn load_rom(&mut self, data: Vec<u8>) { //TODO return result
-        unimplemented!();
+        self.ram.load_rom(data);
     }
 
     pub fn start(&mut self) { //TODO return result

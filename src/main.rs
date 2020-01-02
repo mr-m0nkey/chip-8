@@ -22,7 +22,6 @@ fn main() {
     let mut file = File::open(file_name).unwrap();
     let mut data = Vec::<u8>::new();
     file.read_to_end(&mut data).expect("File not found!");
-
     let mut machine = Machine::new();
     machine.load_rom(data);
     machine.start();
