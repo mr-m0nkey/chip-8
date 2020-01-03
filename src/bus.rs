@@ -17,4 +17,12 @@ impl Bus {
         self.ram.load_rom(data);
     }
 
+    pub fn write_byte(&mut self, address: u16, data: u8) {
+        self.ram.write_byte(address, data);
+    }
+
+    pub fn read_byte(&self, address: u16) -> u8 {
+        self.ram.read_byte(address)
+    }
+
 }
