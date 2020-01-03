@@ -14,7 +14,7 @@ impl Ram {
 
     pub fn load_rom(&mut self, rom: Vec<u8>) {
         let mut rom_index = 0;
-        for i in {513..=(rom.len() + 513)} {
+        for i in {513..(rom.len() + 513)} {
             self.memory[i as usize] = rom[rom_index];
             rom_index += 1;
         }
