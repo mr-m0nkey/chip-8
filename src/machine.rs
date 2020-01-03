@@ -21,7 +21,7 @@ impl Machine {
 
     pub fn start(&mut self) { //TODO return result
         loop {
-            self.cpu.execute_instruction(&self.bus);
+            self.cpu.execute_instruction(&mut self.bus);
         }
     }
 }

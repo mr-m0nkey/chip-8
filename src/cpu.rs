@@ -1,9 +1,11 @@
 use crate::bus::Bus;
 use crate::ram::PROGRAM_START;
 
+const INSTRUCTION_LENGTH: u16 = 2;
+
 //#[derive(Debug)]
 pub struct Cpu {
-    vx: [u8; 16],
+    v: [u8; 16],
     i: u16,
     delay_timer_register: u8,
     sound_timer_register: u8,
@@ -16,7 +18,7 @@ pub struct Cpu {
 impl Cpu {
     pub fn new() -> Cpu {
         Cpu {
-            vx: [0; 16],
+            v: [0; 16],
             i: 0,
             delay_timer_register: 0,
             sound_timer_register: 0,
@@ -26,7 +28,7 @@ impl Cpu {
         }
     }
 
-    pub fn execute_instruction(&mut self, bus: &Bus) { 
+    pub fn execute_instruction(&mut self, bus: &mut Bus) { 
         let most_significant_byte = bus.read_byte(self.program_counter) as u16;
         let least_significant_byte = bus.read_byte(self.program_counter + 1) as u16;
         let instruction: u16 = (most_significant_byte << 8) | least_significant_byte;
@@ -37,12 +39,14 @@ impl Cpu {
         let y = ((instruction & 0x00F0) >> 4) as u8;
         let kk = (instruction & 0xFF) as u8;
         println!("Current executing instrcution: {:#X}", instruction);
+        println!("Program counter: {}", self.program_counter);
+
         match (instruction & 0xF000) >> 12 {
             0x0 => {
                 match kk {
                     0xE0 => {
                         //TODO clear the display
-                        self.program_counter += 2;
+                        self.program_counter += INSTRUCTION_LENGTH;
                     }
                     0xEE => {
                         self.program_counter = self.stack[self.stack_pointer as usize];
@@ -68,32 +72,54 @@ impl Cpu {
 
             0x3 => {
                 //Skip next instruction if Vx = kk.
-                if self.vx[x as usize] == kk {
+                if self.v[x as usize] == kk {
                     self.program_counter += 4;
                 } else {
-                    self.program_counter += 2;
+                    self.program_counter += INSTRUCTION_LENGTH;
                 }
             } 
 
             0x6 => {
-                 self.vx[x as usize] = kk;
-                 self.program_counter += 2;
+                 self.v[x as usize] = kk;
+                 self.program_counter += INSTRUCTION_LENGTH;
             }
 
             0x7 => {
-                self.vx[x as usize] += kk;
-                self.program_counter += 2;
+                self.v[x as usize] = self.v[x as usize].wrapping_add(kk);// += kk;
+                self.program_counter += INSTRUCTION_LENGTH;
+            }
+
+            0x8 => {
+               
+               match n {
+                   0x0 => {
+                       self.v[x as usize] = self.v[y as usize];
+                       self.program_counter += INSTRUCTION_LENGTH;
+                   }
+
+                   0x6 => {
+                        // Set Vx = Vx SHR 1.
+                        // If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.
+                        self.v[0xF as usize] = self.v[x as usize] & 0x1;
+                        self.v[x as usize] = self.v[x as usize] >> 1;
+                        self.program_counter += INSTRUCTION_LENGTH;
+                   }
+
+                   _ => {
+                       panic!("Unhandled instruction: {:#X}", instruction);
+                   }
+               }
             }
 
             0xA => {
                 self.i = nnn;
-                self.program_counter += 2;
+                self.program_counter += INSTRUCTION_LENGTH;
             }
 
             0xD => {
                 //TODO Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
                 // The interpreter reads n bytes from memory, starting at the address stored in I. These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). Sprites are XORed onto the existing screen. If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0. If the sprite is positioned so part of it is outside the coordinates of the display, it wraps around to the opposite side of the screen. See instruction 8xy3 for more information on XOR, and section 2.4, Display, for more information on the Chip-8 screen and sprites.
-                self.program_counter += 2;
+                self.program_counter += INSTRUCTION_LENGTH;
             }
 
             0xF => {
@@ -102,12 +128,22 @@ impl Cpu {
                     0x0A => {
                         // TODO Wait for a key press, store the value of the key in Vx.
                         // All execution stops until a key is pressed, then the value of that key is stored in Vx.
-                        self.program_counter += 2;
+                        self.program_counter += INSTRUCTION_LENGTH;
                     }
 
                     0x1E => {
-                        self.i += self.vx[x as usize] as u16;
-                        self.program_counter += 2;
+                        self.i += self.v[x as usize] as u16;
+                        self.program_counter += INSTRUCTION_LENGTH;
+                    }
+
+                    0x33 => {
+                        // Store BCD representation of Vx in memory locations I, I+1, and I+2.
+                        // The interpreter takes the decimal value of Vx, and places the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2.
+                        let vx = self.v[x as usize];
+                        bus.write_byte(self.i as u16, vx / 100);
+                        bus.write_byte((self.i + 1) as u16, (vx % 100) / 10);
+                        bus.write_byte((self.i + 2) as u16, vx % 10);
+                        self.program_counter += INSTRUCTION_LENGTH;
                     }
 
                     _ => {
