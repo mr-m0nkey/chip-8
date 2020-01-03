@@ -36,7 +36,7 @@ impl Cpu {
         let x = ((instruction & 0x0F00) >> 8) as u8;
         let y = ((instruction & 0x00F0) >> 4) as u8;
         let kk = (instruction & 0xFF) as u8;
-
+        println!("Current executing instrcution: {:#X}", instruction);
         match (instruction & 0xF000) >> 12 {
             0x0 => {
                 match kk {
@@ -49,7 +49,7 @@ impl Cpu {
                         self.stack_pointer -= 1;
                     }
                     _ => {
-                        panic!("Unhandled instruction at 0x0 for {:#X}", kk);
+                        panic!("Unhandled instruction at 0x0 for {:#X}", instruction);
                     }
                 }
              
@@ -70,7 +70,7 @@ impl Cpu {
             }
 
             _ => {
-                panic!("Unhandled instruction");
+                panic!("Unhandled instruction: {:#X}", instruction);
             }
 
         }
