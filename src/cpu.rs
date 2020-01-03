@@ -45,7 +45,6 @@ impl Cpu {
                     }
                     0xEE => {
                         self.program_counter = self.stack[self.stack_pointer as usize];
-                        self.stack[self.stack_pointer as usize] = 0;
                         self.stack_pointer -= 1;
                     }
                     _ => {
@@ -60,8 +59,10 @@ impl Cpu {
             }
 
             0x2 => {
-                //TODO Call subroutine at nnn.
-                // The interpreter increments the stack pointer, then puts the current PC on the top of the stack. The PC is then set to nnn.
+                // Call subroutine at nnn.
+                self.stack_pointer += 1;
+                self.stack[self.stack_pointer as usize] = self.program_counter;
+                self.program_counter = nnn;
             }
 
             0x3 => {
