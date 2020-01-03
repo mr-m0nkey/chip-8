@@ -44,7 +44,9 @@ impl Cpu {
                         //TODO clear the display
                     }
                     0xEE => {
-                        //TODO return from a subroutine
+                        self.program_counter = self.stack[self.stack_pointer as usize];
+                        self.stack[self.stack_pointer as usize] = 0;
+                        self.stack_pointer -= 1;
                     }
                     _ => {
                         panic!("Unhandled instruction at 0x0 for {:#X}", kk);
