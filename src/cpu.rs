@@ -66,8 +66,12 @@ impl Cpu {
             }
 
             0x3 => {
-                //TODO Skip next instruction if Vx = kk.
-                // The interpreter compares register Vx to kk, and if they are equal, increments the program counter by 2.
+                //Skip next instruction if Vx = kk.
+                if self.vx[x as usize] == kk {
+                    self.program_counter += 4;
+                } else {
+                    self.program_counter += 2;
+                }
             }
 
             _ => {
