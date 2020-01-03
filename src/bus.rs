@@ -1,5 +1,6 @@
 use crate::ram::Ram;
-
+use crate::display::Display;
+use crate::keyboard::Keyboard;
 
 //#[derive(Debug)]
 pub struct Bus {

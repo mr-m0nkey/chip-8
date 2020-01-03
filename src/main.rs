@@ -2,6 +2,8 @@ mod machine;
 mod cpu;
 mod ram;
 mod bus;
+mod keyboard;
+mod display;
 
 use std::env;
 use std::fs::File;
