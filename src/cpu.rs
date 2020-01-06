@@ -136,13 +136,29 @@ impl Cpu {
                         self.program_counter += INSTRUCTION_LENGTH;
                     }
 
+                    0x29 => {
+                        // TODO Set I = location of sprite for digit Vx.
+                        // The value of I is set to the location for the hexadecimal sprite 
+                        // corresponding to the value of Vx. See section 2.4, 
+                        // Display, for more information on the Chip-8 hexadecimal font.
+                        self.program_counter += INSTRUCTION_LENGTH;
+                    }
+
                     0x33 => {
-                        // Store BCD representation of Vx in memory locations I, I+1, and I+2.
-                        // The interpreter takes the decimal value of Vx, and places the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2.
                         let vx = self.v[x as usize];
                         bus.write_byte(self.i as u16, vx / 100);
                         bus.write_byte((self.i + 1) as u16, (vx % 100) / 10);
                         bus.write_byte((self.i + 2) as u16, vx % 10);
+                        self.program_counter += INSTRUCTION_LENGTH;
+                    }
+
+                    0x65 => {
+                        // The interpreter reads values from memory starting at location I into registers V0 through Vx.
+                        let mut counter = 0;
+                        for _ in 0..self.v.len() {
+                            self.v[counter as usize] = bus.read_byte(self.i + counter);
+                            counter += 1;
+                        }
                         self.program_counter += INSTRUCTION_LENGTH;
                     }
 
