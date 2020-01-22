@@ -1,10 +1,15 @@
 use crate::cpu::Cpu;
 use crate::bus::Bus;
+use crate::keyboard::Keyboard;
+use crate::display::Display;
+
 
 //#[derive(Debug)]
 pub struct Machine {
     cpu: Cpu,
-    bus: Bus
+    bus: Bus,
+    keyboard: Keyboard,
+    display: Display,
 }
 
 impl Machine {
@@ -12,6 +17,8 @@ impl Machine {
         Machine {
             cpu: Cpu::new(),
             bus: Bus::new(),
+            keyboard: Keyboard::new(),
+            display: Display::new()
         }
     }
 
@@ -21,7 +28,16 @@ impl Machine {
 
     pub fn start(&mut self) { //TODO return result
         loop {
-            self.cpu.execute_instruction(&mut self.bus);
+
+            //TODO check for keyboard input
+            if self.cpu.should_execute {
+                self.cpu.execute_instruction(&mut self.bus);
+            }
+
+            //on keypress event, check if cpu is waiting for keypress
+            //if it is set the last key pressed, if not do nothing
+            
+            
         }
     }
 }

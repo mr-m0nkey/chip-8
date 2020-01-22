@@ -12,6 +12,7 @@ pub struct Cpu {
     program_counter: u16,
     stack_pointer: u8,
     stack: [u16; 16],
+    pub should_execute: bool,
     //TODO add bus reference as a property, read about lifetimes
 }
 
@@ -25,6 +26,7 @@ impl Cpu {
             program_counter: PROGRAM_START,
             stack_pointer: 0,
             stack: [0;16],
+            should_execute: true,
         }
     }
 
@@ -129,6 +131,10 @@ impl Cpu {
                         // TODO Wait for a key press, store the value of the key in Vx.
                         // All execution stops until a key is pressed, then the value of that key is stored in Vx.
                         self.program_counter += INSTRUCTION_LENGTH;
+                        self.should_execute = false;
+                        //TODO check that a key was pressed
+                        //if it was pressed run the instruction and clear the pressed_key
+                        //if it wasn't pressed do nothing
                     }
 
                     0x1E => {

@@ -5,12 +5,16 @@ use crate::keyboard::Keyboard;
 //#[derive(Debug)]
 pub struct Bus {
    ram: Ram,
+   keyboard: Keyboard,
+   display: Display,
 }
 
 impl Bus {
     pub fn new() -> Bus {
         Bus {
             ram: Ram::new(),
+            display: Display::new(),
+            keyboard: Keyboard::new(),
         }
     }
 
@@ -24,6 +28,14 @@ impl Bus {
 
     pub fn read_byte(&self, address: u16) -> u8 {
         self.ram.read_byte(address)
+    }
+
+    pub fn set_last_key_pressed() {
+
+    }
+
+    pub fn get_last_key_pressed () {
+
     }
 
 }
