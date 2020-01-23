@@ -1,5 +1,8 @@
 use crate::bus::Bus;
 use crate::ram::PROGRAM_START;
+use ggez::input::keyboard;
+use ggez::{Context, ContextBuilder, GameResult};
+
 
 const INSTRUCTION_LENGTH: u16 = 2;
 
@@ -13,6 +16,7 @@ pub struct Cpu {
     stack_pointer: u8,
     stack: [u16; 16],
     pub should_execute: bool,
+    pub waiting_for_keypress: bool,
     //TODO add bus reference as a property, read about lifetimes
 }
 
@@ -27,10 +31,11 @@ impl Cpu {
             stack_pointer: 0,
             stack: [0;16],
             should_execute: true,
+            waiting_for_keypress: false,
         }
     }
 
-    pub fn execute_instruction(&mut self, bus: &mut Bus) { 
+    pub fn execute_instruction(&mut self, bus: &mut Bus, context: &mut Context) { 
         let most_significant_byte = bus.read_byte(self.program_counter) as u16;
         let least_significant_byte = bus.read_byte(self.program_counter + 1) as u16;
         let instruction: u16 = (most_significant_byte << 8) | least_significant_byte;
@@ -128,13 +133,15 @@ impl Cpu {
                 match kk {
 
                     0x0A => {
-                        // TODO Wait for a key press, store the value of the key in Vx.
-                        // All execution stops until a key is pressed, then the value of that key is stored in Vx.
-                        self.program_counter += INSTRUCTION_LENGTH;
-                        self.should_execute = false;
-                        //TODO check that a key was pressed
-                        //if it was pressed run the instruction and clear the pressed_key
-                        //if it wasn't pressed do nothing
+                        if keyboard::pressed_keys(context).len() > 0 {
+                            // TODO Wait for a key press, store the value of the key in Vx.
+                            // All execution stops until a key is pressed, then the value of that key is stored in Vx.
+                            self.program_counter += INSTRUCTION_LENGTH;
+                        } 
+
+                       
+                       
+                     
                     }
 
                     0x1E => {

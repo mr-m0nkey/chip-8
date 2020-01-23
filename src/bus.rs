@@ -1,12 +1,16 @@
 use crate::ram::Ram;
 use crate::display::Display;
 use crate::keyboard::Keyboard;
+use ggez::{Context, ContextBuilder, GameResult};
+
 
 //#[derive(Debug)]
 pub struct Bus {
    ram: Ram,
    keyboard: Keyboard,
    display: Display,
+   //TODO put a context reference with lifetimes
+
 }
 
 impl Bus {
