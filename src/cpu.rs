@@ -1,6 +1,8 @@
 use crate::bus::Bus;
 use crate::ram::PROGRAM_START;
 use ggez::input::keyboard;
+use crate::keyboard::Keyboard;
+
 use ggez::{Context, ContextBuilder, GameResult};
 
 
@@ -133,13 +135,21 @@ impl Cpu {
                 match kk {
 
                     0x0A => {
-                        if keyboard::pressed_keys(context).len() > 0 {
-                            // TODO Wait for a key press, store the value of the key in Vx.
-                            // All execution stops until a key is pressed, then the value of that key is stored in Vx.
-                            self.program_counter += INSTRUCTION_LENGTH;
+                        let pressed_keys = keyboard::pressed_keys(context);
+                        if pressed_keys.len() > 0 {
+                            for pressed_key in pressed_keys.iter() {
+                                match Keyboard::get_u8_from_keycode(*pressed_key) {
+                                    Some(key_value) => {
+                                        self.v[x as usize] = key_value;
+                                        self.program_counter += INSTRUCTION_LENGTH;
+                                    },
+                                    None => {},
+                                }
+                            }
+                            
                         } 
 
-                       
+                    //    COLPAYTSCNMJALG
                        
                      
                     }
