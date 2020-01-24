@@ -9,7 +9,6 @@ pub struct Bus {
    ram: Ram,
    keyboard: Keyboard,
    display: Display,
-   //TODO put a context reference with lifetimes
 
 }
 
