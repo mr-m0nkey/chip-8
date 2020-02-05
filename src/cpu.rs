@@ -40,9 +40,6 @@ impl Cpu {
     }
 
 
-
-  
-
     pub fn execute_instruction(&mut self, bus: &mut Bus, context: &mut Context) { 
         let most_significant_byte = bus.read_byte(self.program_counter) as u16;
         let least_significant_byte = bus.read_byte(self.program_counter + 1) as u16;
@@ -53,14 +50,16 @@ impl Cpu {
         let x = ((instruction & 0x0F00) >> 8) as u8;
         let y = ((instruction & 0x00F0) >> 4) as u8;
         let kk = (instruction & 0xFF) as u8;
-        println!("Current executing instrcution: {:#X}", instruction);
-        println!("Program counter: {}", self.program_counter);
+        //println!("Current executing instrcution: {:#X}", instruction);
+        //println!("Program counter: {}", self.program_counter);
 
         match (instruction & 0xF000) >> 12 {
             0x0 => {
                 match kk {
                     0xE0 => {
-                        graphics::clear(context, [0.0, 0.0, 0.0, 0.0].into());
+                        bus.display.clear_screen = true;
+                        bus.display.screen = [0; 2048];
+
                         self.program_counter += INSTRUCTION_LENGTH;
                     }
                     0xEE => {
@@ -132,35 +131,20 @@ impl Cpu {
             }
 
             0xD => {
-                // TODO Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
-                // The interpreter reads n bytes from memory, 
-                // starting at the address stored in I. 
-                // These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). 
-                // Sprites are XORed onto the existing screen. 
-                // An exclusive OR compares the corrseponding bits from two values, 
-                // and if the bits are not both the same, 
-                // then the corresponding bit in the result is set to 1. Otherwise, it is 0. 
-                // If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0. 
-                // If the sprite is positioned so part of it is outside the coordinates of the display, 
-                // it wraps around to the opposite side of the screen. 
-                // See instruction 8xy3 for more information on XOR, and section 2.4, 
-                // Display, for more information on the Chip-8 screen and sprites.
                 let mut byte = 0;
                 let mut counter = 0;
+                let mut vf = false;
                 for i in self.i..(self.i + n as u16) {
                     byte = bus.read_byte(i);
-                    bus.draw_byte(byte, self.v[x as usize], self.v[y as usize] + counter);
-                    // let rect = graphics::Rect::new(self.v[x as usize] as f32, self.v[y as usize] as f32, 15.0, 15.0);
-                    // let r2 = graphics::Mesh::new_rectangle(
-                    //     context,
-                    //     graphics::DrawMode::stroke(1.0),
-                    //     rect,
-                    //     graphics::Color::new(10.0, 10.0, 10.0, 10.0),
-                    // ).expect("msg: &str");
-                    // graphics::draw(context, &r2, DrawParam::default()).expect("msg: &str");
+                    if bus.draw_byte(byte, self.v[x as usize], self.v[y as usize] + counter) {
+                        vf = true;
+                    }
+                   
                     counter += 1;
                 }
-                //self.program_counter += INSTRUCTION_LENGTH;
+
+                bus.write_byte(0xF, vf as u8);
+                self.program_counter += INSTRUCTION_LENGTH;
 
 
                
@@ -184,7 +168,6 @@ impl Cpu {
                             
                         } 
 
-                    //    COLPAYTSCNMJALG
                        
                      
                     }
@@ -199,6 +182,7 @@ impl Cpu {
                         // The value of I is set to the location for the hexadecimal sprite 
                         // corresponding to the value of Vx. See section 2.4, 
                         // Display, for more information on the Chip-8 hexadecimal font.
+                        self.i = self.v[x as usize] as u16 * 5;                        
                         self.program_counter += INSTRUCTION_LENGTH;
                     }
 

@@ -9,7 +9,7 @@ const HEIGHT: usize = 32;
 pub struct Bus {
    ram: Ram,
    keyboard: Keyboard,
-   display: Display,
+   pub display: Display,
 
 }
 
@@ -42,21 +42,20 @@ impl Bus {
 
     }
 
-    pub fn draw_byte(&mut self, byte: u8, x: u8, y: u8) -> bool {
+    pub fn draw_byte(&mut self, byte: u8, x: u8, y: u8) -> bool { //TODO move implementation to Display.rs
         let mut x_coord = x % WIDTH as u8;
-        let mut y_coord = y % HEIGHT as u8;
+        let y_coord = y % HEIGHT as u8;
         let mut erased = false;
         let mut byte = byte;
             for _ in 0..8 {
             
-            let mut bit = (byte & 0b1000_0000) >> 7;
+            let bit = (byte & 0b1000_0000) >> 7;
             let index = self.get_screen_index(x_coord, y_coord);
             let previous_value = self.display.screen[index as usize];
-            self.display.screen[index as usize] ^= bit;
+            self.display.screen[index] ^= bit;
             if previous_value == 1 && self.display.screen[index as usize] == 0 {
                 erased = true;
             }
-
 
             byte <<= 1;
             x_coord += 1;
@@ -67,8 +66,8 @@ impl Bus {
 
     }
 
-    pub fn get_screen_index(&self, x: u8, y: u8) -> u8 {
-        Display::get_index_from_coords(x as usize, y as usize) as u8
+    pub fn get_screen_index(&self, x: u8, y: u8) -> usize {
+        Display::get_index_from_coords(x as usize, y as usize) as usize
     }
 
 }

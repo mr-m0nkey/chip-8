@@ -5,7 +5,13 @@ use crate::display::Display;
 use ggez::{Context, ContextBuilder, GameResult};
 use ggez::event::{self, EventHandler, KeyCode, KeyMods, EventsLoop};
 use ggez::input::keyboard;
-use ggez::graphics;
+
+use ggez::{graphics};
+use ggez::graphics::{Color, DrawMode, DrawParam};
+use ggez::nalgebra::Point2;
+
+const PIXEL_SIZE: f32 = 15.0;
+
 
 
 //#[derive(Debug)]
@@ -13,7 +19,6 @@ pub struct Machine {
     cpu: Cpu,
     pub bus: Bus,
     keyboard: Keyboard,
-    display: Display,
 }
 
 
@@ -22,13 +27,48 @@ impl EventHandler for Machine {
     fn update(&mut self, _ctx: &mut Context) -> GameResult {
        if self.cpu.should_execute {
             self.cpu.execute_instruction(&mut self.bus, _ctx);
+            if self.bus.display.clear_screen {
+                println!("clear screen");
+                self.bus.display.screen = [0; 2048];
+            }
         }
         Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
 
+        if self.bus.display.clear_screen {
+            graphics::clear(ctx, graphics::BLACK);
+            self.bus.display.clear_screen = false;
+        } else {
+            let mut index = 0;
+            for pixel_value in self.bus.display.screen.iter() {
+
+                match pixel_value {
+                    0x1 => {
+                        let (x, y) = Display::get_coords_from_index(index);
+                        let rect = graphics::Rect::new(x as f32 * PIXEL_SIZE, y as f32 * PIXEL_SIZE, 15.0, 15.0);
+                            let r2 = graphics::Mesh::new_rectangle(
+                                ctx,
+                                graphics::DrawMode::stroke(1.0),
+                                rect,
+                                graphics::Color::new(10.0, 10.0, 10.0, 10.0),
+                            )?;
+                            graphics::draw(ctx, &r2, DrawParam::default())?;
+                    }
+                    _ => {
+
+                    }
+                }
+                
+                index += 1;
+            }
+        }
+
+        
+
         graphics::present(ctx)
+        
     }
 
 
@@ -59,12 +99,10 @@ impl EventHandler for Machine {
 impl Machine {
     pub fn new() -> Machine {
         
-        
         Machine {
             cpu: Cpu::new(),
             bus: Bus::new(),
             keyboard: Keyboard::new(),
-            display: Display::new(),
         }
     }
 
