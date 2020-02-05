@@ -1,2 +1,2 @@
-# chip-8
-A Chip-8 emulator written in RUST
+# How to use
+cargo run <path_to_rom>
