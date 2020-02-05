@@ -12,6 +12,11 @@ use ggez::{Context, ContextBuilder, GameResult};
 use ggez::event::{self, EventHandler, KeyCode, KeyMods, EventsLoop};
 use ggez::graphics;
 use machine::Machine;
+use ggez::conf::FullscreenType;
+use ggez::conf::WindowMode;
+
+const PIXEL_SIZE: f32 = 15.0;
+
 
 
 fn main() {
@@ -30,8 +35,24 @@ fn main() {
 
 
      let (mut ctx, mut event_loop) = ContextBuilder::new("game_name", "author_name")
+                                            .window_mode(
+                                                WindowMode{
+                                                    width: 64.0 * PIXEL_SIZE,
+                                                    height: 32.0 * PIXEL_SIZE,
+                                                    maximized: false,
+                                                    fullscreen_type: FullscreenType::Windowed,
+                                                    borderless: false,
+                                                    min_width: 0.0,
+                                                    max_width: 0.0,
+                                                    min_height: 0.0,
+                                                    max_height: 0.0,
+                                                    resizable: false,
+                                                })
                                             .build()
+                                            
                                             .unwrap();
+
+    
    
 
 
@@ -42,6 +63,8 @@ fn main() {
         Ok(_) => println!("Exited cleanly."),
         Err(e) => println!("Error occured: {}", e)
     }
+
+    
 
     
 }

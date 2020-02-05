@@ -27,8 +27,6 @@ impl EventHandler for Machine {
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
-        graphics::clear(ctx, graphics::WHITE);
-        // Draw code here...
 
         graphics::present(ctx)
     }

@@ -1,12 +1,15 @@
+use ggez;
 use crate::bus::Bus;
 use crate::ram::PROGRAM_START;
 use ggez::input::keyboard;
 use crate::keyboard::Keyboard;
-
-use ggez::{Context, ContextBuilder, GameResult};
-
+use ggez::{event, graphics, Context, GameResult};
+use ggez::graphics::{Color, DrawMode, DrawParam};
+use ggez::nalgebra::Point2;
 
 const INSTRUCTION_LENGTH: u16 = 2;
+const WIDTH: usize = 64;
+const HEIGHT: usize = 32;
 
 //#[derive(Debug)]
 pub struct Cpu {
@@ -19,7 +22,6 @@ pub struct Cpu {
     stack: [u16; 16],
     pub should_execute: bool,
     pub waiting_for_keypress: bool,
-    //TODO add bus reference as a property, read about lifetimes
 }
 
 impl Cpu {
@@ -36,6 +38,10 @@ impl Cpu {
             waiting_for_keypress: false,
         }
     }
+
+
+
+  
 
     pub fn execute_instruction(&mut self, bus: &mut Bus, context: &mut Context) { 
         let most_significant_byte = bus.read_byte(self.program_counter) as u16;
@@ -54,7 +60,7 @@ impl Cpu {
             0x0 => {
                 match kk {
                     0xE0 => {
-                        //TODO clear the display
+                        graphics::clear(context, [0.0, 0.0, 0.0, 0.0].into());
                         self.program_counter += INSTRUCTION_LENGTH;
                     }
                     0xEE => {
@@ -126,9 +132,38 @@ impl Cpu {
             }
 
             0xD => {
-                //TODO Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
-                // The interpreter reads n bytes from memory, starting at the address stored in I. These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). Sprites are XORed onto the existing screen. If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0. If the sprite is positioned so part of it is outside the coordinates of the display, it wraps around to the opposite side of the screen. See instruction 8xy3 for more information on XOR, and section 2.4, Display, for more information on the Chip-8 screen and sprites.
-                self.program_counter += INSTRUCTION_LENGTH;
+                // TODO Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
+                // The interpreter reads n bytes from memory, 
+                // starting at the address stored in I. 
+                // These bytes are then displayed as sprites on screen at coordinates (Vx, Vy). 
+                // Sprites are XORed onto the existing screen. 
+                // An exclusive OR compares the corrseponding bits from two values, 
+                // and if the bits are not both the same, 
+                // then the corresponding bit in the result is set to 1. Otherwise, it is 0. 
+                // If this causes any pixels to be erased, VF is set to 1, otherwise it is set to 0. 
+                // If the sprite is positioned so part of it is outside the coordinates of the display, 
+                // it wraps around to the opposite side of the screen. 
+                // See instruction 8xy3 for more information on XOR, and section 2.4, 
+                // Display, for more information on the Chip-8 screen and sprites.
+                let mut byte = 0;
+                let mut counter = 0;
+                for i in self.i..(self.i + n as u16) {
+                    byte = bus.read_byte(i);
+                    bus.draw_byte(byte, self.v[x as usize], self.v[y as usize] + counter);
+                    // let rect = graphics::Rect::new(self.v[x as usize] as f32, self.v[y as usize] as f32, 15.0, 15.0);
+                    // let r2 = graphics::Mesh::new_rectangle(
+                    //     context,
+                    //     graphics::DrawMode::stroke(1.0),
+                    //     rect,
+                    //     graphics::Color::new(10.0, 10.0, 10.0, 10.0),
+                    // ).expect("msg: &str");
+                    // graphics::draw(context, &r2, DrawParam::default()).expect("msg: &str");
+                    counter += 1;
+                }
+                //self.program_counter += INSTRUCTION_LENGTH;
+
+
+               
             }
 
             0xF => {
