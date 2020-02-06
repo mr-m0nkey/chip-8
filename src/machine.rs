@@ -27,21 +27,14 @@ impl EventHandler for Machine {
     fn update(&mut self, _ctx: &mut Context) -> GameResult {
        if self.cpu.should_execute {
             self.cpu.execute_instruction(&mut self.bus, _ctx);
-            if self.bus.display.clear_screen {
-                println!("clear screen");
-                self.bus.display.screen = [0; 2048];
-            }
         }
         Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
 
-        if self.bus.display.clear_screen {
-            graphics::clear(ctx, graphics::BLACK);
-            self.bus.display.clear_screen = false;
-        } else {
-            let mut index = 0;
+        let mut index = 0;
+            let mut was_anything_drawn = false;
             for pixel_value in self.bus.display.screen.iter() {
 
                 match pixel_value {
@@ -55,6 +48,7 @@ impl EventHandler for Machine {
                                 graphics::Color::new(10.0, 10.0, 10.0, 10.0),
                             )?;
                             graphics::draw(ctx, &r2, DrawParam::default())?;
+                            was_anything_drawn = true;
                     }
                     _ => {
 
@@ -63,8 +57,9 @@ impl EventHandler for Machine {
                 
                 index += 1;
             }
-        }
-
+            if was_anything_drawn == false {
+                graphics::clear(ctx, graphics::BLACK);
+            }
         
 
         graphics::present(ctx)

@@ -5,15 +5,17 @@ const HEIGHT: usize = 32;
 //#[derive(Debug)]
 pub struct Display {
     pub screen: [u8; WIDTH * HEIGHT],
-    pub clear_screen: bool,
 }
 
 impl Display {
     pub fn new() -> Display {
         Display {
             screen: [0; WIDTH * HEIGHT],
-            clear_screen: false,
         }
+    }
+
+    pub fn clear_screen(&mut self) {
+        self.screen = [0; 2048];
     }
 
 
