@@ -80,4 +80,40 @@ impl Keyboard {
             }
         }
     }
+
+    pub fn get_keycode_from_u8(int_value: u8) -> Option<KeyCode> {
+        match int_value {
+
+            0x0 => {
+                Some(KeyCode::Key0)
+            }
+
+            0x1 => {
+                Some(KeyCode::Key1)
+            }
+
+            0x2 => {
+                Some(KeyCode::Key2) 
+            }
+
+            0x4 => {
+                Some(KeyCode::Key4)
+            }
+
+            0x5 => {
+                Some(KeyCode::Key5)
+            }
+
+            0x6 => {
+                Some(KeyCode::Key6)
+            }
+
+            _ => {
+                None
+            }
+        }
+    }
+
+
+
 }

@@ -50,16 +50,14 @@ impl Cpu {
         let x = ((instruction & 0x0F00) >> 8) as u8;
         let y = ((instruction & 0x00F0) >> 4) as u8;
         let kk = (instruction & 0xFF) as u8;
-        //println!("Current executing instrcution: {:#X}", instruction);
-        //println!("Program counter: {}", self.program_counter);
+        println!("Current executing instrcution: {:#X}", instruction);
+        println!("Program counter: {}", self.program_counter);
 
         match (instruction & 0xF000) >> 12 {
             0x0 => {
                 match kk {
                     0xE0 => {
-                        bus.display.clear_screen = true;
-                        bus.display.screen = [0; 2048];
-
+                        bus.display.clear_screen();
                         self.program_counter += INSTRUCTION_LENGTH;
                     }
                     0xEE => {
@@ -78,20 +76,34 @@ impl Cpu {
             }
 
             0x2 => {
-                // Call subroutine at nnn.
                 self.stack_pointer += 1;
                 self.stack[self.stack_pointer as usize] = self.program_counter;
                 self.program_counter = nnn;
             }
 
             0x3 => {
-                //Skip next instruction if Vx = kk.
                 if self.v[x as usize] == kk {
-                    self.program_counter += 4;
+                    self.program_counter += INSTRUCTION_LENGTH * 2;
                 } else {
                     self.program_counter += INSTRUCTION_LENGTH;
                 }
             } 
+
+            0x4 => {
+                if self.v[x as usize] != kk {
+                    self.program_counter += INSTRUCTION_LENGTH * 2;
+                } else {
+                    self.program_counter += INSTRUCTION_LENGTH;
+                }
+            }
+
+            0x5 => {
+                if self.v[x as usize] == self.v[y as usize] {
+                    self.program_counter += INSTRUCTION_LENGTH * 2;
+                } else {
+                    self.program_counter += INSTRUCTION_LENGTH;
+                }
+            }
 
             0x6 => {
                  self.v[x as usize] = kk;
@@ -131,23 +143,51 @@ impl Cpu {
             }
 
             0xD => {
-                let mut byte = 0;
                 let mut counter = 0;
-                let mut vf = false;
+                let mut erased = false;
                 for i in self.i..(self.i + n as u16) {
-                    byte = bus.read_byte(i);
+                    let byte = bus.read_byte(i);
                     if bus.draw_byte(byte, self.v[x as usize], self.v[y as usize] + counter) {
-                        vf = true;
+                        erased = true;
                     }
                    
                     counter += 1;
                 }
-
-                bus.write_byte(0xF, vf as u8);
+                
+                self.v[0xF as usize] = erased as u8;
                 self.program_counter += INSTRUCTION_LENGTH;
 
 
                
+            }
+
+            0xE => {
+
+                match kk {
+
+                    0x9E => {
+                        println!("{} is expected", self.v[x as usize]);
+                        let key_code_result = Keyboard::get_keycode_from_u8(self.v[x as usize]);
+                        match key_code_result {
+                            Some(key_code) => {
+                                if keyboard::is_key_pressed(context, key_code) {
+                                    self.program_counter += INSTRUCTION_LENGTH * 2;
+                                } else {
+                                    self.program_counter += INSTRUCTION_LENGTH;
+                                }
+                            }
+
+                            _ => {
+                                //self.program_counter += INSTRUCTION_LENGTH;
+                            }
+                        }
+                    }
+
+                    _ => {
+
+                    }
+                   
+                }
             }
 
             0xF => {
@@ -178,10 +218,6 @@ impl Cpu {
                     }
 
                     0x29 => {
-                        // TODO Set I = location of sprite for digit Vx.
-                        // The value of I is set to the location for the hexadecimal sprite 
-                        // corresponding to the value of Vx. See section 2.4, 
-                        // Display, for more information on the Chip-8 hexadecimal font.
                         self.i = self.v[x as usize] as u16 * 5;                        
                         self.program_counter += INSTRUCTION_LENGTH;
                     }
@@ -194,8 +230,15 @@ impl Cpu {
                         self.program_counter += INSTRUCTION_LENGTH;
                     }
 
+                    0x55 => {
+                        for index in 0..x {
+                            bus.write_byte(self.i, self.v[index as usize]);
+                        }
+
+                        self.program_counter += INSTRUCTION_LENGTH;
+                    }
+
                     0x65 => {
-                        // The interpreter reads values from memory starting at location I into registers V0 through Vx.
                         let mut counter = 0;
                         for _ in 0..self.v.len() {
                             self.v[counter as usize] = bus.read_byte(self.i + counter);
