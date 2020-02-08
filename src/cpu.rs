@@ -183,9 +183,8 @@ impl Cpu {
                    }
 
                    0xE => {
-                        // If the most-significant bit of Vx is 1, 
+                        // TODO If the most-significant bit of Vx is 1, 
                         // then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
-                        self.v[x as usize] & 0x
                    }
 
                    _ => {
