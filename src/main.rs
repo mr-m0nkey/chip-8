@@ -20,6 +20,7 @@ const PIXEL_SIZE: f32 = 15.0;
 
 
 fn main() {
+    
     println!("Hello, this is my chip 8 emulator!");
 
     let args: Vec<String> = env::args().collect();

@@ -25,9 +25,15 @@ pub struct Machine {
 
 impl EventHandler for Machine {
     fn update(&mut self, _ctx: &mut Context) -> GameResult {
-       if self.cpu.should_execute {
+
+            
+        if self.cpu.should_execute {
             self.cpu.execute_instruction(&mut self.bus, _ctx);
         }
+        if self.cpu.delay_timer_register > 0 {
+            self.cpu.delay_timer_register -= 1;
+        }
+       
         Ok(())
     }
 
@@ -59,7 +65,7 @@ impl EventHandler for Machine {
             }
             if was_anything_drawn == false {
                 graphics::clear(ctx, graphics::BLACK);
-            }
+            } //TODO use display.is_screen_blank
         
 
         graphics::present(ctx)

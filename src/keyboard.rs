@@ -96,6 +96,10 @@ impl Keyboard {
                 Some(KeyCode::Key2) 
             }
 
+            0x3 => {
+                Some(KeyCode::Key3) 
+            }
+
             0x4 => {
                 Some(KeyCode::Key4)
             }
@@ -106,6 +110,42 @@ impl Keyboard {
 
             0x6 => {
                 Some(KeyCode::Key6)
+            }
+
+            0x7 => {
+                Some(KeyCode::Key7)
+            }
+
+            0x8 => {
+                Some(KeyCode::Key8)
+            }
+
+            0x9 => {
+                Some(KeyCode::Key9)
+            }
+
+            0xA => {
+                Some(KeyCode::A)
+            }
+
+            0xB => {
+                Some(KeyCode::B)
+            }
+
+            0xC => {
+                Some(KeyCode::C)
+            }
+
+            0xD => {
+                Some(KeyCode::D)
+            }
+
+            0xE => {
+                Some(KeyCode::E)
+            }
+
+            0xF => {
+                Some(KeyCode::F)
             }
 
             _ => {

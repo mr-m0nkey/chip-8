@@ -31,5 +31,9 @@ impl Display {
         (x as usize, y as usize)
     }
 
+    pub fn is_screen_blank(&self) -> bool {
+        unimplemented!();
+    }
+
 
 }

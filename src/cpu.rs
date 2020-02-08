@@ -6,6 +6,8 @@ use crate::keyboard::Keyboard;
 use ggez::{event, graphics, Context, GameResult};
 use ggez::graphics::{Color, DrawMode, DrawParam};
 use ggez::nalgebra::Point2;
+use rand::Rng;
+
 
 const INSTRUCTION_LENGTH: u16 = 2;
 const WIDTH: usize = 64;
@@ -15,7 +17,7 @@ const HEIGHT: usize = 32;
 pub struct Cpu {
     v: [u8; 16],
     i: u16,
-    delay_timer_register: u8,
+    pub delay_timer_register: u8,
     sound_timer_register: u8,
     program_counter: u16,
     stack_pointer: u8,
@@ -39,6 +41,8 @@ impl Cpu {
         }
     }
 
+    
+
 
     pub fn execute_instruction(&mut self, bus: &mut Bus, context: &mut Context) { 
         let most_significant_byte = bus.read_byte(self.program_counter) as u16;
@@ -50,7 +54,7 @@ impl Cpu {
         let x = ((instruction & 0x0F00) >> 8) as u8;
         let y = ((instruction & 0x00F0) >> 4) as u8;
         let kk = (instruction & 0xFF) as u8;
-        println!("Current executing instrcution: {:#X}", instruction);
+        //println!("Current executing instrcution: {:#X}", instruction);
         println!("Program counter: {}", self.program_counter);
 
         match (instruction & 0xF000) >> 12 {
@@ -123,12 +127,65 @@ impl Cpu {
                        self.program_counter += INSTRUCTION_LENGTH;
                    }
 
+                   0x1 => {
+                       self.v[x as usize] |= self.v[y as usize];
+                       self.program_counter += INSTRUCTION_LENGTH;
+                   }
+
+                   0x2 => {
+                       self.v[x as usize] &= self.v[y as usize];
+                       self.program_counter += INSTRUCTION_LENGTH;
+                   }
+
+                   0x3 => {
+                       self.v[x as usize] ^= self.v[y as usize];
+                       self.program_counter += INSTRUCTION_LENGTH;
+                   }
+
+                   0x4 => {
+                       let sum = self.v[x as usize] as u16 + self.v[y as usize] as u16;
+                       self.v[x as usize] = (sum & 0x00FF) as u8;
+                       if sum > 255 {
+                           self.v[0xF as usize] = 1;
+                       } else {
+                           self.v[0xF as usize] = 0;
+                       }
+                       self.program_counter += INSTRUCTION_LENGTH;
+                   }
+
+                   0x5 => {
+                       if self.v[x as usize] > self.v[y as usize] {
+                           self.v[0xF as usize] = 1;
+                       } else {
+                           self.v[0xF as usize] = 0;
+                       }
+
+                       self.v[x as usize] -= self.v[y as usize];
+
+                   }
+
                    0x6 => {
                         // Set Vx = Vx SHR 1.
                         // If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.
                         self.v[0xF as usize] = self.v[x as usize] & 0x1;
-                        self.v[x as usize] = self.v[x as usize] >> 1;
+                        self.v[x as usize] /= 2;
                         self.program_counter += INSTRUCTION_LENGTH;
+                   }
+
+                   0x7 => {
+                       if self.v[y as usize] > self.v[x as usize] {
+                           self.v[0xF as usize] = 1;
+                       } else {
+                           self.v[0xF as usize] = 0;
+                       }
+                       self.v[x as usize] = self.v[y as usize] - self.v[x as usize];
+                       self.program_counter += INSTRUCTION_LENGTH;
+                   }
+
+                   0xE => {
+                        // If the most-significant bit of Vx is 1, 
+                        // then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
+                        self.v[x as usize] & 0x
                    }
 
                    _ => {
@@ -139,6 +196,12 @@ impl Cpu {
 
             0xA => {
                 self.i = nnn;
+                self.program_counter += INSTRUCTION_LENGTH;
+            }
+
+            0xC => {
+                let random_number = rand::thread_rng().gen_range(0, 255);
+                self.v[x as usize] = random_number & kk;
                 self.program_counter += INSTRUCTION_LENGTH;
             }
 
@@ -153,8 +216,13 @@ impl Cpu {
                    
                     counter += 1;
                 }
+
+                if erased {
+                    self.v[0xF as usize] = 1;
+                } else {
+                    self.v[0xF as usize] = 0;
+                }
                 
-                self.v[0xF as usize] = erased as u8;
                 self.program_counter += INSTRUCTION_LENGTH;
 
 
@@ -165,8 +233,24 @@ impl Cpu {
 
                 match kk {
 
+                    0xA1 => {
+                        let key_code_result = Keyboard::get_keycode_from_u8(self.v[x as usize]);
+                        match key_code_result {
+                            Some(key_code) => {
+                                if !keyboard::is_key_pressed(context, key_code) {
+                                    self.program_counter += INSTRUCTION_LENGTH * 2;
+                                } else {
+                                    self.program_counter += INSTRUCTION_LENGTH;
+                                }
+                            }
+
+                            _ => {
+
+                            }
+                        }
+                    }
+
                     0x9E => {
-                        println!("{} is expected", self.v[x as usize]);
                         let key_code_result = Keyboard::get_keycode_from_u8(self.v[x as usize]);
                         match key_code_result {
                             Some(key_code) => {
@@ -178,13 +262,13 @@ impl Cpu {
                             }
 
                             _ => {
-                                //self.program_counter += INSTRUCTION_LENGTH;
+
                             }
                         }
                     }
 
                     _ => {
-
+                        panic!("Unhandled instruction: {:#X}", instruction);
                     }
                    
                 }
@@ -201,6 +285,7 @@ impl Cpu {
                                     Some(key_value) => {
                                         self.v[x as usize] = key_value;
                                         self.program_counter += INSTRUCTION_LENGTH;
+                                        break;
                                     },
                                     None => {},
                                 }
@@ -210,6 +295,21 @@ impl Cpu {
 
                        
                      
+                    } 
+
+                    0x07 => {
+                        self.v[x as usize] = self.delay_timer_register;
+                        self.program_counter += INSTRUCTION_LENGTH;
+                    }
+
+                    0x15 => {
+                        self.delay_timer_register = self.v[x as usize];
+                        self.program_counter += INSTRUCTION_LENGTH;
+                    }
+
+                    0x18 => {
+                        self.sound_timer_register = self.v[x as usize];
+                        self.program_counter += INSTRUCTION_LENGTH;
                     }
 
                     0x1E => {
@@ -239,10 +339,8 @@ impl Cpu {
                     }
 
                     0x65 => {
-                        let mut counter = 0;
-                        for _ in 0..self.v.len() {
-                            self.v[counter as usize] = bus.read_byte(self.i + counter);
-                            counter += 1;
+                        for counter in 0..self.v.len() {
+                            self.v[counter as usize] = bus.read_byte(self.i + counter as u16);
                         }
                         self.program_counter += INSTRUCTION_LENGTH;
                     }
