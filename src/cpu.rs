@@ -54,8 +54,9 @@ impl Cpu {
         let x = ((instruction & 0x0F00) >> 8) as u8;
         let y = ((instruction & 0x00F0) >> 4) as u8;
         let kk = (instruction & 0xFF) as u8;
-        //println!("Current executing instrcution: {:#X}", instruction);
+        println!("Current executing instrcution: {:#X}", instruction);
         println!("Program counter: {}", self.program_counter);
+       
 
         match (instruction & 0xF000) >> 12 {
             0x0 => {
@@ -79,9 +80,9 @@ impl Cpu {
                 self.program_counter = nnn;
             }
 
-            0x2 => {
+            0x2 => { 
                 self.stack_pointer += 1;
-                self.stack[self.stack_pointer as usize] = self.program_counter;
+                self.stack[self.stack_pointer as usize] = self.program_counter + INSTRUCTION_LENGTH;
                 self.program_counter = nnn;
             }
 
@@ -143,14 +144,13 @@ impl Cpu {
                    }
 
                    0x4 => {
-                       let sum = self.v[x as usize] as u16 + self.v[y as usize] as u16;
-                       self.v[x as usize] = (sum & 0x00FF) as u8;
-                       if sum > 255 {
-                           self.v[0xF as usize] = 1;
-                       } else {
-                           self.v[0xF as usize] = 0;
-                       }
-                       self.program_counter += INSTRUCTION_LENGTH;
+
+                        let sum: u16 = self.v[x as usize] as u16 + self.v[y as usize] as u16;
+                        self.v[x as usize] = sum as u8;
+                        if sum > 0xFF {
+                            self.v[0xF as usize] = 1;
+                        }
+                       self.program_counter += INSTRUCTION_LENGTH; 
                    }
 
                    0x5 => {
@@ -159,16 +159,16 @@ impl Cpu {
                        } else {
                            self.v[0xF as usize] = 0;
                        }
-
                        self.v[x as usize] -= self.v[y as usize];
-
+                       self.program_counter += INSTRUCTION_LENGTH; 
                    }
 
                    0x6 => {
                         // Set Vx = Vx SHR 1.
                         // If the least-significant bit of Vx is 1, then VF is set to 1, otherwise 0. Then Vx is divided by 2.
-                        self.v[0xF as usize] = self.v[x as usize] & 0x1;
-                        self.v[x as usize] /= 2;
+                        // self.v[0xF as usize] = self.v[x as usize] & 0x1;
+                        // self.v[x as usize] /= 2;
+                        self.v[x as usize] >>= 0x1;
                         self.program_counter += INSTRUCTION_LENGTH;
                    }
 
@@ -183,8 +183,8 @@ impl Cpu {
                    }
 
                    0xE => {
-                        // TODO If the most-significant bit of Vx is 1, 
-                        // then VF is set to 1, otherwise to 0. Then Vx is multiplied by 2.
+                        self.v[x as usize] <<= 0x1;
+                        self.program_counter += INSTRUCTION_LENGTH;
                    }
 
                    _ => {
@@ -193,9 +193,23 @@ impl Cpu {
                }
             }
 
+                 
+            0x9 => {
+                if self.v[x as usize] != self.v[y as usize] {
+                    self.program_counter += INSTRUCTION_LENGTH;
+                    self.program_counter += INSTRUCTION_LENGTH;
+                } else {
+                    self.program_counter += INSTRUCTION_LENGTH;
+                }
+            }
+
             0xA => {
                 self.i = nnn;
                 self.program_counter += INSTRUCTION_LENGTH;
+            }
+
+            0xB => {
+                self.program_counter = nnn + self.v[0 as usize] as u16;
             }
 
             0xC => {
@@ -254,7 +268,8 @@ impl Cpu {
                         match key_code_result {
                             Some(key_code) => {
                                 if keyboard::is_key_pressed(context, key_code) {
-                                    self.program_counter += INSTRUCTION_LENGTH * 2;
+                                    self.program_counter += INSTRUCTION_LENGTH;
+                                    self.program_counter += INSTRUCTION_LENGTH;
                                 } else {
                                     self.program_counter += INSTRUCTION_LENGTH;
                                 }
@@ -317,6 +332,8 @@ impl Cpu {
                     }
 
                     0x29 => {
+                        // Set I = location of sprite for digit Vx.
+                        // The value of I is set to the location for the hexadecimal sprite corresponding to the value of Vx. See section 2.4, Display, for more information on the Chip-8 hexadecimal font.
                         self.i = self.v[x as usize] as u16 * 5;                        
                         self.program_counter += INSTRUCTION_LENGTH;
                     }
@@ -333,7 +350,6 @@ impl Cpu {
                         for index in 0..x {
                             bus.write_byte(self.i, self.v[index as usize]);
                         }
-
                         self.program_counter += INSTRUCTION_LENGTH;
                     }
 
