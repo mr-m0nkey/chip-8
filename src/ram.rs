@@ -7,10 +7,7 @@ pub struct Ram {
 
 impl Ram {
     pub fn new() -> Ram {
-        let mut ram = Ram {
-            memory: [0; 4096],
-        };
-
+        let mut ram = Ram { memory: [0; 4096] };
 
         let sprites: [[u8; 5]; 16] = [
             [0xF0, 0x90, 0x90, 0x90, 0xF0],
@@ -44,11 +41,10 @@ impl Ram {
 
     pub fn load_rom(&mut self, rom: Vec<u8>) {
         let mut rom_index = 0;
-        for i in {PROGRAM_START as usize..(rom.len() + (PROGRAM_START as usize))} {
+        for i in { PROGRAM_START as usize..(rom.len() + (PROGRAM_START as usize)) } {
             self.memory[i as usize] = rom[rom_index];
             rom_index += 1;
         }
-
     }
 
     pub fn write_byte(&mut self, address: u16, data: u8) {

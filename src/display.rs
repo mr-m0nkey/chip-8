@@ -1,4 +1,3 @@
-
 const WIDTH: usize = 64;
 const HEIGHT: usize = 32;
 
@@ -18,10 +17,8 @@ impl Display {
         self.screen = [0; 2048];
     }
 
-
-
     pub fn get_index_from_coords(x: usize, y: usize) -> usize {
-        (y as u16 * 64 + x as u16) as usize    
+        (y as u16 * 64 + x as u16) as usize
     }
 
     pub fn get_coords_from_index(index: usize) -> (usize, usize) {
@@ -34,6 +31,4 @@ impl Display {
     pub fn is_screen_blank(&self) -> bool {
         unimplemented!();
     }
-
-
 }
