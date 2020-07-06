@@ -32,6 +32,7 @@ impl EventHandler for Machine {
         Ok(())
     }
 
+    //FIXME fix bug with drawing sprites at screen boundaries
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         graphics::clear(ctx, graphics::BLACK);
 

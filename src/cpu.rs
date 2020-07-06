@@ -40,6 +40,7 @@ impl Cpu {
         }
     }
 
+    //FIXME there's a bug somewhere here 
     pub fn execute_instruction(&mut self, bus: &mut Bus, context: &mut Context) {
         let most_significant_byte = bus.read_byte(self.program_counter) as u16;
         let least_significant_byte = bus.read_byte(self.program_counter + 1) as u16;
@@ -100,7 +101,7 @@ impl Cpu {
                     self.program_counter += INSTRUCTION_LENGTH * 2;
                 } else {
                     self.program_counter += INSTRUCTION_LENGTH;
-                }
+                }self.v[x as usize].checked_sub(self.v[y as usize]);
             }
 
             0x6 => {
@@ -150,7 +151,7 @@ impl Cpu {
                         } else {
                             self.v[0xF as usize] = 0;
                         }
-                        self.v[x as usize] -= self.v[y as usize];
+                        self.v[x as usize].checked_sub(self.v[y as usize]);
                         self.program_counter += INSTRUCTION_LENGTH;
                     }
 
