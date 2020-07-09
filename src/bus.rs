@@ -30,14 +30,11 @@ impl Bus {
         self.ram.read_byte(address)
     }
 
-    pub fn set_last_key_pressed() {}
-
-    pub fn get_last_key_pressed() {}
-
     pub fn draw_byte(&mut self, byte: u8, x: u8, y: u8) -> bool {
         //TODO move implementation to Display.rs
         let mut x_coord = x % WIDTH as u8;
         let y_coord = y % HEIGHT as u8;
+
         let mut erased = false;
         let mut byte = byte;
         for _ in 0..8 {
@@ -46,6 +43,7 @@ impl Bus {
                 panic!("{} and {}", x_coord, y_coord);
             }
             let index = self.get_screen_index(x_coord, y_coord);
+
             if index >= 2048 {
                 panic!("{} and {}", x_coord, y_coord);
             }
@@ -57,6 +55,7 @@ impl Bus {
 
             byte <<= 1;
             x_coord += 1;
+            x_coord = x_coord % WIDTH as u8;
         }
 
         erased

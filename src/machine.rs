@@ -1,7 +1,6 @@
 use crate::bus::Bus;
 use crate::cpu::Cpu;
 use crate::display::Display;
-use crate::keyboard::Keyboard;
 use ggez::event::{self, EventHandler, KeyCode, KeyMods};
 use ggez::{Context, GameResult};
 
@@ -95,8 +94,5 @@ impl Machine {
     pub fn load_rom(&mut self, data: Vec<u8>) {
         //TODO return result
         self.bus.load_rom(data);
-    }
-
-    pub fn start(&mut self) { //TODO return result
     }
 }
