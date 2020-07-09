@@ -1,4 +1,4 @@
-use ggez::event::{self, EventHandler, EventsLoop, KeyCode, KeyMods};
+use ggez::event::KeyCode;
 
 //#[derive(Debug)]
 pub struct Keyboard {}

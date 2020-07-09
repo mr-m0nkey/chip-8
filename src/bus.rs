@@ -1,14 +1,11 @@
 use crate::display::Display;
-use crate::keyboard::Keyboard;
 use crate::ram::Ram;
-use ggez::{Context, ContextBuilder, GameResult};
 const WIDTH: usize = 64;
 const HEIGHT: usize = 32;
 
 //#[derive(Debug)]
 pub struct Bus {
     ram: Ram,
-    keyboard: Keyboard,
     pub display: Display,
 }
 
@@ -17,7 +14,6 @@ impl Bus {
         Bus {
             ram: Ram::new(),
             display: Display::new(),
-            keyboard: Keyboard::new(),
         }
     }
 
@@ -46,11 +42,11 @@ impl Bus {
         let mut byte = byte;
         for _ in 0..8 {
             let bit = (byte & 0b1000_0000) >> 7;
-            if (x_coord as u16 * y_coord as u16 > 2048) {
+            if x_coord as u16 * y_coord as u16 > 2048 {
                 panic!("{} and {}", x_coord, y_coord);
             }
             let index = self.get_screen_index(x_coord, y_coord);
-            if (index >= 2048) {
+            if index >= 2048 {
                 panic!("{} and {}", x_coord, y_coord);
             }
             let previous_value = self.display.screen[index as usize];

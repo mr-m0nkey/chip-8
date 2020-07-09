@@ -2,13 +2,11 @@ use crate::bus::Bus;
 use crate::cpu::Cpu;
 use crate::display::Display;
 use crate::keyboard::Keyboard;
-use ggez::event::{self, EventHandler, EventsLoop, KeyCode, KeyMods};
-use ggez::input::keyboard;
-use ggez::{Context, ContextBuilder, GameResult};
+use ggez::event::{self, EventHandler, KeyCode, KeyMods};
+use ggez::{Context, GameResult};
 
 use ggez::graphics;
-use ggez::graphics::{Color, DrawMode, DrawParam};
-use ggez::nalgebra::Point2;
+use ggez::graphics::DrawParam;
 
 const PIXEL_SIZE: f32 = 15.0;
 
@@ -16,7 +14,6 @@ const PIXEL_SIZE: f32 = 15.0;
 pub struct Machine {
     cpu: Cpu,
     pub bus: Bus,
-    keyboard: Keyboard,
 }
 
 impl EventHandler for Machine {
@@ -92,7 +89,6 @@ impl Machine {
         Machine {
             cpu: Cpu::new(),
             bus: Bus::new(),
-            keyboard: Keyboard::new(),
         }
     }
 

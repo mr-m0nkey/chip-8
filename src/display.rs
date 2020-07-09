@@ -27,8 +27,4 @@ impl Display {
         let y = index as u16 / width as u16;
         (x as usize, y as usize)
     }
-
-    pub fn is_screen_blank(&self) -> bool {
-        unimplemented!();
-    }
 }

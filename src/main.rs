@@ -7,9 +7,8 @@ mod ram;
 
 use ggez::conf::FullscreenType;
 use ggez::conf::WindowMode;
-use ggez::event::{self, EventHandler, EventsLoop, KeyCode, KeyMods};
-use ggez::graphics;
-use ggez::{Context, ContextBuilder, GameResult};
+use ggez::event::{self};
+use ggez::ContextBuilder;
 use machine::Machine;
 use std::env;
 use std::fs::File;
@@ -33,8 +32,8 @@ fn main() {
 
     let (mut ctx, mut event_loop) = ContextBuilder::new("game_name", "author_name")
         .window_mode(WindowMode {
-            width: 64.0 * PIXEL_SIZE,
-            height: 32.0 * PIXEL_SIZE,
+            width: 65.0 * PIXEL_SIZE,
+            height: 33.0 * PIXEL_SIZE,
             maximized: false,
             fullscreen_type: FullscreenType::Windowed,
             borderless: false,

@@ -2,15 +2,11 @@ use crate::bus::Bus;
 use crate::keyboard::Keyboard;
 use crate::ram::PROGRAM_START;
 use ggez;
-use ggez::graphics::{Color, DrawMode, DrawParam};
 use ggez::input::keyboard;
-use ggez::nalgebra::Point2;
-use ggez::{event, graphics, Context, GameResult};
+use ggez::Context;
 use rand::Rng;
 
 const INSTRUCTION_LENGTH: u16 = 2;
-const WIDTH: usize = 64;
-const HEIGHT: usize = 32;
 
 //#[derive(Debug)]
 pub struct Cpu {
@@ -40,7 +36,7 @@ impl Cpu {
         }
     }
 
-    //FIXME there's a bug somewhere here 
+    //FIXME there's a bug somewhere here
     pub fn execute_instruction(&mut self, bus: &mut Bus, context: &mut Context) {
         let most_significant_byte = bus.read_byte(self.program_counter) as u16;
         let least_significant_byte = bus.read_byte(self.program_counter + 1) as u16;
@@ -101,7 +97,7 @@ impl Cpu {
                     self.program_counter += INSTRUCTION_LENGTH * 2;
                 } else {
                     self.program_counter += INSTRUCTION_LENGTH;
-                }self.v[x as usize].checked_sub(self.v[y as usize]);
+                }
             }
 
             0x6 => {
@@ -217,7 +213,6 @@ impl Cpu {
                     if bus.draw_byte(byte, self.v[x as usize], self.v[y as usize] + counter) {
                         erased = true;
                     }
-
                     counter += 1;
                 }
 
